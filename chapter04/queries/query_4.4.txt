@@ -1,0 +1,38 @@
+CREATE CONSTRAINT FOR (a: Movie) REQUIRE a.title is UNIQUE; 
+CREATE CONSTRAINT FOR (a: Genre) REQUIRE a.genre is UNIQUE;
+CREATE CONSTRAINT FOR (a: Person) REQUIRE a.name is UNIQUE; 
+
+CREATE (pulp: Movie {title: 'Pulp Fiction'})
+
+FOREACH (director in ['Quentin Tarantino']
+| MERGE (p: Person {name: director}) SET p:Director MERGE(p)-[:DIRECTOR]->(pulp))
+
+FOREACH (actor in ['John Travolta', 'Samuel L. Jackson', 'Bruce Willis', 'Uma Thurman']
+| MERGE (p: Person {name: actor}) SET p:Actor MERGE (p)-[:ACTS_IN]->(pulp))
+
+FOREACH (writer in ['Quentin Tarantino', 'Roger Avary'] 
+| MERGE (p: Person {name: writer}) SET p:Writer MERGE (p)-[:WROTE]->(pulp))
+
+FOREACH (genre in ['Action', 'Crime', 'Thriller']
+| MERGE (g: Genre {name: genre}) MERGE (pulp)-[:HAS]->(g))
+
+
+CREATE (punisher: Movie {title: 'The punisher'})
+FOREACH (director in ['Jonathan Hensleigh']
+| MERGE (p: Person {name: director}) SET p:Director MERGE (p)-[:DIRECTED]->(punisher))
+FOREACH (actor in ['Thomas Jane', 'John Travolta', 'Samantha Mathis']
+| MERGE (p: Person {name: actor}) SET p:Actor MERGE (p)-[:ACTS_IN]->(punisher))
+FOREACH (writer in ['Jonathan Hensleigh', 'Michael France']
+| MERGE(p:Person {name: writer}) SET p:Writer MERGE (p)-[:WROTE]->(punisher))
+FOREACH (genre in ['Action', 'Adventure', 'Crime', 'Drama', 'Thriller']
+| MERGE (g:Genre {name: genre}) MERGE (punisher)-[:HAS]->(g))
+
+CREATE (bill: Movie {title: 'Kill Bill: Volume 1'})
+FOREACH (director in ['Quentin Tarantino']
+| MERGE (p: Person {name:director}) SET p:Director MERGE (p)-[:DIRECTED]->(bill))
+FOREACH (actor in ['Uma Thurman', 'Lucy Liu', 'Vivica A. Fox']
+| MERGE (p:Person {name: actor}) SET p:Actor MERGE (p)-[:ACTS_IN]->(bill))
+FOREACH (writer IN ['Quentin Tarantino', 'Uma Thurman']
+| MERGE (p:Person {name: writer}) SET p:Writer MERGE (p)-[:WROTE]->(bill))
+FOREACH (genre IN ['Action', 'Crime', 'Thriller']
+| MERGE (g:Genre {genre: genre}) MERGE (bill)-[:AS]->(g))

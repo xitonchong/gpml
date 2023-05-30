@@ -1,0 +1,11 @@
+match (m: Movie)
+with m.actors as actors 
+unwind actors as actor 
+match (n: Movie)
+where actor in n.actors 
+with actor, n.actors as otherActors, n.title as title 
+unwind otherActors as otherActor 
+with actor, otherActor, title 
+where actor <> otherActor 
+return actor, otherActor, title 
+order by actor 

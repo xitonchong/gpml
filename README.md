@@ -1,6 +1,10 @@
 https://github.com/alenegro81/gpml
 
 
+# remeber to install graph data science and apoc library 
+before starting the database else you will get transaction commit error during import. 
+
+
 CREATE allows you to create a new node (or relationship). 
 parentheses define the boundaries of the created not instances,
 p, t, k are instances of the label Movie. 

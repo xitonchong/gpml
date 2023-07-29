@@ -20,7 +20,7 @@ class GraphDBBase():
         self.neo4j_user = None
         self.neo4j_password = None 
         self.source_dataset_path = None 
-        self.opts = {} 
+        self.opts = {}
         self.args = [] 
 
         if argv: 
@@ -52,6 +52,7 @@ class GraphDBBase():
 
         self._driver = GraphDatabase.driver(uri, auth=(user, password), **other_params)
         self._session = None
+        print(f"uri: {uri}, user: {user}, password: {password}")
             
 
     def get_opts(self):

@@ -2,3 +2,5 @@ env/
 *.zip
 __pycache__/
 dataset/
+.DS_Store
+relate.project.json

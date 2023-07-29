@@ -1,0 +1,18 @@
+:auto using PERIODIC commit 500
+load csv from "file:///masc_sentences.tsv" as line
+fieldterminator '\t'
+with line[6] as sentence 
+with split(sentence, " ") as words
+foreach (idx in range(0, size(words)-2) |
+    merge (w1: Word {value: words[idx]})
+    merge (w2: Word {value: words[idx+1]})
+    merge (w1)-[r:NEXT]->(w2) 
+    on create set r.weight = 1
+    on match set r.weight = r.weight + 1)
+
+
+# listing 11.6 find the 10 most common pairs of words
+match (w1: Word)-[r:NEXT]->(w2) 
+return w1.value as first, w2.value as second, r.weight as frequency 
+order by r.weight DESC
+limit 10

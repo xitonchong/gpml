@@ -1,5 +1,11 @@
 https://github.com/alenegro81/gpml
 
+ned to set the PYTHONPATH environment variable, so Python will able to find auxiliary libraries (in the top-level directory of the projecct)
+```
+export PYTHONPATH="$(pwd):$PYTHONPATH"
+```
+#uri = bolt://localhost:7687
+# this one works from accessing host service within docker container 
 
 # remeber to install graph data science and apoc library 
 before starting the database else you will get transaction commit error during import. 

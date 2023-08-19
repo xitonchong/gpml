@@ -11,6 +11,13 @@ export PYTHONPATH="$(pwd):$PYTHONPATH"
 before starting the database else you will get transaction commit error during import. 
 
 
+## Extra Knowledge!!! 
+`update node with property list while keeping current properties (not with SET n.prop = 'x')`
+You can use SET n += {props}. I guess it's available since 2.1.0.
+
+
+
+
 CREATE allows you to create a new node (or relationship). 
 parentheses define the boundaries of the created not instances,
 p, t, k are instances of the label Movie. 

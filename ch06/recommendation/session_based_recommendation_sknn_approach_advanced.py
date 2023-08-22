@@ -33,11 +33,12 @@ class SessionBasedRecommender(GraphDBBase):
         for ix in range(overall_size): 
             x = sessions_VSM.getrow(ix) 
             #print(f"sessions_VSM type: {sessions_VSM}")
-            print(f"x typeL: {type(x)}, {x}")
+            #print(f"x typeL: {type(x)}, {x}")
             t.add_item(ix, x.toarray()[0]) 
             i += 1 
             if i % 1000 == 0:
                 print(i, "rows processed over", overall_size) 
+            if i > 40_000:
                 break
         print("time to index: ", time.perf_counter() - start) 
         del sessions_VSM
@@ -73,10 +74,21 @@ class SessionBasedRecommender(GraphDBBase):
             tx = session.begin_transaction() 
             knnMap = {str(a): b for a,b in knn}
             clean_query = """
-                MATCH (session:Session)-[:SIMILAR_TO]->()
+                MATCH (session:Session)-[s:SIMILAR_TO]->()
                 WHERE session.sessionId = $sessionId 
                 DELETE s
             """
+            query = """
+                MATCH (session:Session) 
+                WHERE session.sessionId = $sessionId 
+                UNWIND keys($knn) as otherSessionId 
+                MATCH (other:Session) 
+                WHERE other.sessionId = toInteger(otherSessionId) 
+                MERGE (session)-[:SIMILAR_TO {weight: $knn[otherSessionId]}]->(other)
+            """
+            tx.run(clean_query, {"sessionId": session_id})
+            tx.run(query, {"sessionId": session_id, "knn": knnMap})
+            tx.commit()
 
 
 
@@ -133,10 +145,27 @@ class SessionBasedRecommender(GraphDBBase):
         return sessions_VSM_sparse.getMatrix(), sessions_id 
     
 
+    def recommend_to(self, session_id, k): 
+        top_items = [] 
+        query = """
+            MATCH (target:Session)-[r:SIMILAR_TO]->(d:Session)-[:CONTAINS]->(:Click)-[:IS_RELATED_TO]->(item:Item)
+            WHERE target.sessionId = $sessionId 
+            WITH DISTINCT item.itemId as itemId, r 
+            RETURN itemId, sum(r.weight) as score
+            ORDER BY score desc 
+            LIMIT %s
+        """
+        with self._driver.session() as session: 
+            tx = session.begin_transaction() 
+            for result in tx.run(query % (k), {"sessionId": session_id}):
+                top_items.append((result['itemId'], result['score']))
+        top_items.sort(key=lambda x: -x[1]) # sort score from highest to lowest
+        return top_items
+
 
 if __name__ == "__main__":
     recommender = SessionBasedRecommender(sys.argv[1:])
     recommender.compute_and_store_similarity()
-    #top10 = recommender.recommend_to(12547, 10) 
-    #print(top10) 
+    top10 = recommender.recommend_to(12547, 10) 
+    print(top10) 
     recommender.close()

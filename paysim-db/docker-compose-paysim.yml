@@ -1,0 +1,29 @@
+# run python and neo4j in docker container
+
+version: '2'
+services: 
+  neo4j: 
+    image: neo4j:4.4-community
+    container_name: neo4j
+    environment:
+      NEO4J_AUTH: 'neo4j/password'
+      NEO4JLABS_PLUGINS: '["apoc", "graph-data-science"]'
+      NEO4J_CACHE_MEMORY: 2G
+      NEO4J_HEAP_MEMORY: 8G
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: yes
+      # dbms.connector.bolt.listen_address: 7688
+      # dbms.connector.bolt.advertised_address: 7688
+    ulimits:
+      memlock:
+        soft: -1 
+        hard: -1 
+    mem_limit: 32g
+    volumes:
+      - ./data:/data:rw
+      - ./logs:/logs:rw
+      - ./import:/var/lib/neo4j/import:rw
+      - ./plugins:/plugins:rw
+    ports:
+      - 7474:7474
+      - 7473:7473
+      - 7687:7687

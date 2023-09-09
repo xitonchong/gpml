@@ -11,6 +11,28 @@ export PYTHONPATH="$(pwd):$PYTHONPATH"
 before starting the database else you will get transaction commit error during import. 
 
 
+
+## DOCKER NETWORK to ensure two containers are able to communicate 
+symptom: will raise service error not found on gpml_ver2 to paysim database
+containers that were created using docker compose up are placed under <folder-name>-default network
+e.g. paysim-db_default, docker-compose_default 
+whereas those environment created using docker run .... under bridge
+
+So.., we need to place them under same network 
+docker network create my_network
+docker network connect my_network gpml_ver2
+docker network connect my_network paysim # paysim is container name 
+docker network connect my_network neo4j 
+
+# to check which containers are under same network
+docker network inspect my_network
+docker exec -it gpml_ver2 ping neo4j
+
+
+reference:  https://www.digitalocean.com/community/questions/how-to-ping-docker-container-from-another-container-by-name
+
+
+
 ## Extra Knowledge!!! 
 `update node with property list while keeping current properties (not with SET n.prop = 'x')`
 You can use SET n += {props}. I guess it's available since 2.1.0.
